@@ -1,5 +1,6 @@
-import json, requests, logging, os
+import json, requests, pandas as pd, logging, csv, os
 from collections import Counter
+import urllib.request
 
 logPath=f'{os.getcwd()}/debug.log'
 if(os.name=='nt'):
@@ -10,6 +11,19 @@ if os.path.exists(logPath):
             x.close()
 
 logging.basicConfig(filename='debug.log', encoding='utf-8', level=logging.DEBUG)
+
+def connect(host='http://google.com'):
+    try:
+        urllib.request.urlopen(host) #Python 3.x
+        return True
+    except:
+        return False
+
+logging.debug('Checking for internet connection.')
+if connect() == False:
+    logging.critical('Could not detect internet connection, quitting...')
+    print("\033[91m[ERROR] You don't have a connection to the internet, please connect and try again")
+logging.debug("Check successful.")
 
 API_KEY="YOUR_API_KEY"
 
@@ -37,7 +51,9 @@ def getFromApi(params):
 try:
     pages=int(getFromApi(payload)["recenttracks"]["@attr"]["totalPages"])
 except:
-    logging.warning("Error pulling data from Last.FM servers, ensure you have a connection and all data is correct.")
+    logging.critical("Error pulling data from Last.FM servers, ensure all data is correct.")
+    print("\033[91m[ERROR] Data could not be pulled from last.fm servers, ensure all data is correct.")
+    exit()
 
 i=0
 while i<pages:
@@ -45,7 +61,7 @@ while i<pages:
     payload['page']=i
     request=getFromApi(payload)
     if(i==pages):
-        LIMIT=int(1000-((pages*1000)-int(request["recenttracks"]["@attr"]["total"])))
+        LIMIT=int(LIMIT-((pages*LIMIT)-int(request["recenttracks"]["@attr"]["total"])))
     j=0
     while j<LIMIT:
         dataTable["track_name"].append(request['recenttracks']['track'][j]["name"]) # from here get data and put it in table
@@ -53,30 +69,33 @@ while i<pages:
         dataTable["album_name"].append(request['recenttracks']['track'][j]["album"]['#text'])
         j=j+1
 
-mostListenedSong = Counter(dataTable['track_name']).most_common(5)
+noToCount=3
+
+mostListenedSong = Counter(dataTable['track_name']).most_common(noToCount)
 logging.info(mostListenedSong)
-mostListenedArtist = Counter(dataTable['artist_name']).most_common(5)
+mostListenedArtist = Counter(dataTable['artist_name']).most_common(noToCount)
 logging.info(mostListenedArtist)
-mostListenedAlbum = Counter(dataTable['album_name']).most_common(5)
+mostListenedAlbum = Counter(dataTable['album_name']).most_common(noToCount)
 logging.info(mostListenedArtist)
 
 print(f"Welcome to your 2022 Wrapped, {USER}!\n\n")
 
-print(f"""Your top 5 most listened songs are...
-1.{mostListenedSong[0][0]} with {mostListenedSong[0][1]} plays!
-2.{mostListenedSong[1][0]} with {mostListenedSong[1][1]} plays!
-3.{mostListenedSong[2][0]} with {mostListenedSong[2][1]} plays!
-4.{mostListenedSong[3][0]} with {mostListenedSong[3][1]} plays!
-5.{mostListenedSong[4][0]} with {mostListenedSong[4][1]} plays!\n""")
-print(f"""Your top 5 most listened artists are...
-1.{mostListenedArtist[0][0]} with {mostListenedArtist[0][1]} plays!
-2.{mostListenedArtist[1][0]} with {mostListenedArtist[1][1]} plays!
-3.{mostListenedArtist[2][0]} with {mostListenedArtist[2][1]} plays!
-4.{mostListenedArtist[3][0]} with {mostListenedArtist[3][1]} plays!
-5.{mostListenedArtist[4][0]} with {mostListenedArtist[4][1]} plays!\n""")
-print(f"""Your top 5 most listened albums are...
-1.{mostListenedAlbum[0][0]} with {mostListenedAlbum[0][1]} plays!
-2.{mostListenedAlbum[1][0]} with {mostListenedAlbum[1][1]} plays!
-3.{mostListenedAlbum[2][0]} with {mostListenedAlbum[2][1]} plays!
-4.{mostListenedAlbum[3][0]} with {mostListenedAlbum[3][1]} plays!
-5.{mostListenedAlbum[4][0]} with {mostListenedAlbum[4][1]} plays!""")
+i=0
+print(f"Your top {noToCount} most listened songs are...\n")
+while i<noToCount:
+    i=i+1
+    print(f'{i}. {mostListenedSong[i-1][0]} with {mostListenedSong[i-1][1]} plays!')
+print('\n')
+
+i=0
+print(f"Your top {noToCount} most listened artists are...\n")
+while i<noToCount:
+    i=i+1
+    print(f'{i}. {mostListenedArtist[i-1][0]} with {mostListenedArtist[i-1][1]} plays!')
+print('\n')
+
+i=0
+print(f"Your top {noToCount} most listened albums are...\n")
+while i<noToCount:
+    i=i+1
+    print(f'{i}. {mostListenedAlbum[i-1][0]} with {mostListenedAlbum[i-1][1]} plays!')
