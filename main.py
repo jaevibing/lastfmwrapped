@@ -1,7 +1,13 @@
 import json, sys, requests, logging, csv, os
 from collections import Counter
 import urllib.request
-from datetime import datetime # to get year
+import datetime # to get year
+
+API_KEY="YOUR_API_KEY"
+
+USER="YOUR_USER_NAME"
+
+LIMIT=1000
 
 # check if passed amount to count arg
 if len(sys.argv) == 1:
@@ -10,8 +16,8 @@ else:
     noToCount = int(sys.argv[1])
 
 year = datetime.date.today().year
-beginEpoch = str(datetime(year, 1, 1, 0, 0).timestamp())
-endEpoch = str(datetime(year, 10, 31, 0, 0).timestamp())
+beginEpoch = str(datetime.datetime(year, 1, 1, 0, 0).timestamp())
+endEpoch = str(datetime.datetime(year, 10, 31, 0, 0).timestamp())
 
 logPath=f'{os.getcwd()}/debug.log'
 if(os.name=='nt'):
@@ -35,12 +41,6 @@ if connect() == False:
     logging.critical('Could not detect internet connection, quitting...')
     print("\033[91m[ERROR] You don't have a connection to the internet, please connect and try again")
 logging.debug("Check successful.")
-
-API_KEY="YOUR_API_KEY"
-
-USER="YOUR_USERNAME"
-
-LIMIT=1000
 
 payload = {
     'method': 'user.getrecenttracks',
