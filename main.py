@@ -1,6 +1,11 @@
 import json, requests, pandas as pd, logging, csv, os
 from collections import Counter
 import urllib.request
+from datetime import datetime # to get year
+
+year = datetime.date.today().year
+beginEpoch = str(datetime(year, 1, 1, 0, 0).timestamp())
+endEpoch = str(datetime(year, 10, 31, 0, 0).timestamp())
 
 logPath=f'{os.getcwd()}/debug.log'
 if(os.name=='nt'):
@@ -12,7 +17,7 @@ if os.path.exists(logPath):
 
 logging.basicConfig(filename='debug.log', encoding='utf-8', level=logging.DEBUG)
 
-def connect(host='http://google.com'):
+def connect(host='http://google.com'): # check if user is connected to internet
     try:
         urllib.request.urlopen(host) #Python 3.x
         return True
@@ -36,8 +41,8 @@ payload = {
     'user': USER,
     'api_key': API_KEY,
     'format': 'json',
-    'from': '1640955600',
-    'to': '1667181599',
+    'from': beginEpoch,
+    'to': endEpoch,
     'limit': LIMIT,
     'page': '1'
 }
@@ -69,7 +74,7 @@ while i<pages:
         dataTable["album_name"].append(request['recenttracks']['track'][j]["album"]['#text'])
         j=j+1
 
-noToCount=3
+noToCount=3 # number of songs, albums, artists to count
 
 mostListenedSong = Counter(dataTable['track_name']).most_common(noToCount)
 logging.info(mostListenedSong)
@@ -78,7 +83,7 @@ logging.info(mostListenedArtist)
 mostListenedAlbum = Counter(dataTable['album_name']).most_common(noToCount)
 logging.info(mostListenedArtist)
 
-print(f"Welcome to your 2022 Wrapped, {USER}!\n\n")
+print(f"Welcome to your {year} Wrapped, {USER}!\n\n")
 
 i=0
 print(f"Your top {noToCount} most listened songs are...\n")
