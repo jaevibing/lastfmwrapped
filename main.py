@@ -1,7 +1,13 @@
-import json, requests, logging, csv, os
+import json, sys, requests, logging, csv, os
 from collections import Counter
 import urllib.request
 from datetime import datetime # to get year
+
+# check if passed amount to count arg
+if len(sys.argv) == 1:
+    noToCount = 5
+else:
+    noToCount = int(sys.argv[1])
 
 year = datetime.date.today().year
 beginEpoch = str(datetime(year, 1, 1, 0, 0).timestamp())
@@ -73,8 +79,6 @@ while i<pages:
         dataTable["artist_name"].append(request['recenttracks']['track'][j]["artist"]['#text'])
         dataTable["album_name"].append(request['recenttracks']['track'][j]["album"]['#text'])
         j=j+1
-
-noToCount=3 # number of songs, albums, artists to count
 
 mostListenedSong = Counter(dataTable['track_name']).most_common(noToCount)
 logging.info(mostListenedSong)
