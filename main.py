@@ -1,4 +1,4 @@
-import json, requests, pandas as pd, logging, csv, os
+import json, requests, logging, csv, os
 from collections import Counter
 import urllib.request
 from datetime import datetime # to get year
